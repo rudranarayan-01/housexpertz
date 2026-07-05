@@ -1,16 +1,47 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { MotiView } from 'moti';
 import React from 'react';
-import { Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, Text, View } from 'react-native';
 
+// Refactored array mirroring Urban Company workflow routes
 const PROFILE_OPTIONS = [
-  { icon: 'person-outline', title: 'Edit Account Profile', sub: 'Manage numbers & primary addresses' },
-  { icon: 'shield-checkmark-outline', title: 'Privacy Policy', sub: 'HouseXpertz data security rules' },
-  { icon: 'document-text-outline', title: 'Terms of Service', sub: 'Usage conditions & logging parameters' },
-  { icon: 'help-circle-outline', title: 'Customer Help Desk', sub: '24/7 direct operator assistance channels' }
+  { 
+    icon: 'person-outline', 
+    title: 'Edit Account Profile', 
+    sub: 'Manage numbers & primary addresses',
+    route: '/profile/edit' 
+  },
+  { 
+    icon: 'wallet-outline', 
+    title: 'HouseXpertz Wallet', 
+    sub: 'Manage payment methods, history & cashbacks',
+    route: '/wallet' 
+  },
+  { 
+    icon: 'settings-outline', 
+    title: 'App Settings', 
+    sub: 'Notifications, theme settings, privacy & terms',
+    route: '/settings' 
+  },
+  { 
+    icon: 'help-circle-outline', 
+    title: 'Customer Help Desk', 
+    sub: '24/7 direct operator assistance channels',
+    route: '/help' 
+  }
 ];
 
 export default function ProfileScreen() {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    Alert.alert('Logout', 'Are you sure you want to sign out of HouseXpertz?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Logout', style: 'destructive', onPress: () => console.log('User logged out') },
+    ]);
+  };
+
   return (
     <ScrollView className="flex-1 bg-slate-50" showsVerticalScrollIndicator={false}>
       
@@ -46,6 +77,7 @@ export default function ProfileScreen() {
           {PROFILE_OPTIONS.map((opt, idx) => (
             <Pressable 
               key={idx} 
+              onPress={() => router.push(opt.route as any)}
               className={`flex-row items-center justify-between py-4 ${idx !== PROFILE_OPTIONS.length - 1 ? 'border-b border-slate-50' : ''} active:opacity-60`}
             >
               <View className="flex-row items-center flex-1 pr-4">
@@ -63,8 +95,11 @@ export default function ProfileScreen() {
           ))}
         </MotiView>
 
-        {/* Premium Lougout Utility Box */}
-        <Pressable className="mt-6 bg-red-50 border border-red-100 rounded-2xl py-4 flex-row items-center justify-center active:scale-[0.99]">
+        {/* Premium Logout Utility Box */}
+        <Pressable 
+          onPress={handleLogout}
+          className="mt-6 bg-red-50 border border-red-100 rounded-2xl py-4 flex-row items-center justify-center active:scale-[0.99]"
+        >
           <Ionicons name="log-out-outline" size={18} color="#EF4444" />
           <Text className="text-red-600 font-extrabold text-sm ml-2">Sign Out Account</Text>
         </Pressable>
