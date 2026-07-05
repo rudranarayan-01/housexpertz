@@ -78,22 +78,22 @@ export interface ServiceDetailResponse {
 export const BookingService = {
 
     getTopBooked: async (): Promise<TopBookedService[]> => {
-        const response = await api.get('/api/v1/services/top-booked');
+        const response = await api.get('/services/top-booked');
         return response.data;
     },
 
     getCategoryStats: async (): Promise<CategoryStat[]> => {
-        const response = await api.get('/api/v1/services/category-stats');
+        const response = await api.get('/services/category-stats');
         return response.data;
     },
 
     getServicesByCategorySlug: async (categorySlug: string): Promise<CategoryServicesResponse> => {
-        const response = await api.get(`/api/v1/services/category/slug/${categorySlug}`);
+        const response = await api.get(`/services/category/slug/${categorySlug}`);
         return response.data;
     },
 
     getServiceDetailsBySlug: async (slug: string): Promise<ServiceDetailResponse> => {
-        const response = await api.get(`/api/v1/services/detail/${slug}`);
+        const response = await api.get(`/services/details/${slug}`);
         return response.data;
     },
 };

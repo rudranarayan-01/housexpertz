@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 
 // 1. Instantiate the base client configuration
 const api = axios.create({
-    baseURL: 'https://api.housexpertz.in',
+    baseURL: 'https://api.housexpertz.in/api/v1',
     timeout: 10000, // 10 second timeout threshold
     headers: {
         'Content-Type': 'application/json',
