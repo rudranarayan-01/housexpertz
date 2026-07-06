@@ -101,7 +101,7 @@ export default function BookingsScreen() {
                                     <Text className="text-slate-700 font-bold text-xs">Call Expert</Text>
                                 </Pressable>
                                 <Pressable className="flex-1 bg-[#0B132B] py-3 rounded-xl active:bg-blue-600 items-center">
-                                    <Text className="text-white font-bold text-xs">Live Tracking</Text>
+                                    <Text className="text-white font-bold text-xs">Details</Text>
                                 </Pressable>
                             </View>
                         </MotiView>
