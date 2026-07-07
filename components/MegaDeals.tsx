@@ -61,7 +61,7 @@ export default function MegaDeals() {
                         key={deal.id}
                         onPress={() => router.push(`/services/${deal.targetSlug}` as any)}
                         style={{ width: CARD_WIDTH }}
-                        className="h-40 bg-[#0B132B] rounded-[28px] mr-3 overflow-hidden relative p-5 justify-between shadow-md shadow-slate-900/10 active:scale-[0.99]"
+                        className="h-40 bg-[#0f1b40] rounded-[28px] mr-3 overflow-hidden relative p-5 justify-between shadow-md shadow-slate-900/10 active:scale-[0.99]"
                     >
                         <View className="absolute inset-0 bg-gradient-to-br from-blue-900/40 to-transparent opacity-60" />
 
