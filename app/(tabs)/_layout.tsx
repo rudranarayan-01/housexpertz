@@ -1,27 +1,27 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <View className="flex-1 bg-white">
-      {/* Light status bar icons so they are visible over the dark #0B132B header */}
       <StatusBar style="light" backgroundColor="#0B132B" translucent />
 
       <Tabs
         screenOptions={{
-          // Electric Blue for active states, muted Slate for inactive
           tabBarActiveTintColor: "#2563EB",
           tabBarInactiveTintColor: "#94A3B8",
-
-          // Premium bottom tab styling
           tabBarStyle: {
             backgroundColor: "#FFFFFF",
             borderTopColor: "#F1F5F9",
-            height: 64,
-            paddingBottom: 10,
-            paddingTop: 8,
+            // Compensates layout values based on native button overlays
+            height: Platform.OS === 'ios' ? 52 + insets.bottom : 64 + (insets.bottom > 0 ? insets.bottom : 0),
+            paddingBottom: insets.bottom > 0 ? insets.bottom : 12,
+            paddingTop: 10,
             elevation: 10,
             shadowColor: "#0F172A",
             shadowOffset: { width: 0, height: -4 },
@@ -32,8 +32,9 @@ export default function TabsLayout() {
             fontSize: 11,
             fontWeight: "700",
             letterSpacing: -0.1,
+            marginBottom: Platform.OS === 'android' && insets.bottom === 0 ? 4 : 0,
           },
-          headerShown: false, // Hidden because our premium screens implement custom status/headers
+          headerShown: false,
         }}
       >
         <Tabs.Screen
@@ -54,12 +55,13 @@ export default function TabsLayout() {
             ),
           }}
         />
+        {/* REPLACED BOOKINGS WITH CART */}
         <Tabs.Screen
-          name="bookings"
+          name="cart"
           options={{
-            title: "Bookings",
+            title: "Cart",
             tabBarIcon: ({ color, focused }) => (
-              <Ionicons name={focused ? "briefcase" : "briefcase-outline"} size={22} color={color} />
+              <Ionicons name={focused ? "cart" : "cart-outline"} size={22} color={color} />
             ),
           }}
         />
@@ -70,6 +72,13 @@ export default function TabsLayout() {
             tabBarIcon: ({ color, focused }) => (
               <Ionicons name={focused ? "person" : "person-outline"} size={22} color={color} />
             ),
+          }}
+        />
+        <Tabs.Screen
+          name="bookings"
+          options={{
+            href: null,
+            title: 'My Bookings',
           }}
         />
       </Tabs>

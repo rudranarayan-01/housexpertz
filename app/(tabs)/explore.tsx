@@ -96,34 +96,35 @@ export default function ExploreScreen() {
   }
 
   return (
-    <View className="flex-1 bg-slate-50 items-center justify-center">
-      {/* Structural constraint to prevent screen blowout on large dashboard form factors */}
-      <View className="w-full h-full max-w-6xl bg-white self-center shadow-sm relative">
+    <View className="flex-1 bg-slate-50">
+      <View className="w-full h-full bg-slate-50 relative flex-1">
         
         {/* HEADER SEARCH BAR BLOCK */}
-        <View className="bg-[#0B132B] pt-14 pb-5 px-5 rounded-b-[36px] shadow-xl shadow-slate-900/20 z-10">
-          <View className="flex-row items-center bg-white/10 border border-white/15 h-12 rounded-2xl px-4 max-w-2xl mx-auto w-full">
-            <Ionicons name="search-sharp" size={18} color="#94A3B8" />
-            <TextInput
-              placeholder="Search within this category..."
-              placeholderTextColor="#64748B"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              className="flex-1 ml-3 font-semibold text-white text-xs"
-            />
-            {searchQuery.length > 0 && (
-              <Pressable onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={16} color="#94A3B8" />
-              </Pressable>
-            )}
+        <View className="bg-[#0B132B] pt-14 pb-5 px-5 md:px-12 rounded-b-[36px] shadow-xl shadow-slate-900/20 z-10">
+          <View className="max-w-7xl mx-auto w-full">
+            <View className="flex-row items-center bg-white/10 border border-white/15 h-12 rounded-2xl px-4 max-w-2xl">
+              <Ionicons name="search-sharp" size={18} color="#94A3B8" />
+              <TextInput
+                placeholder="Search within this category..."
+                placeholderTextColor="#64748B"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                className="flex-1 ml-3 font-semibold text-white text-xs"
+              />
+              {searchQuery.length > 0 && (
+                <Pressable onPress={() => setSearchQuery('')}>
+                  <Ionicons name="close-circle" size={16} color="#94A3B8" />
+                </Pressable>
+              )}
+            </View>
           </View>
         </View>
 
         {/* TWO-COLUMN MATRIX FRAMEWORK */}
-        <View className="flex-1 flex-row">
+        <View className="flex-1 max-w-7xl w-full mx-auto flex-row">
 
           {/* LEFT SIDEBAR: Navigation Hub */}
-          <View className="w-24 md:w-28 bg-slate-50 border-r border-slate-100">
+          <View className="w-24 md:w-32 bg-slate-50 border-r border-slate-100">
             <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="py-4">
               {sortedCategories.map((category: CategoryStat) => {
                 const isSelected = selectedSlug === category.slug;
@@ -168,7 +169,7 @@ export default function ExploreScreen() {
           </View>
 
           {/* RIGHT SIDEBAR PANEL: Interactive Service Grid */}
-          <View className="flex-1 bg-white px-4 pt-5">
+          <View className="flex-1 bg-white px-4 md:px-8 pt-5">
             <Text className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-3 px-1">
               {activeCategoryName}
             </Text>
@@ -191,7 +192,7 @@ export default function ExploreScreen() {
                     <View className="flex-1 items-center justify-center py-12 px-4">
                       <Ionicons name="search-outline" size={32} color="#CBD5E1" />
                       <Text className="text-slate-400 text-xs font-medium text-center mt-2">
-                        No matches found for "{searchQuery}"
+                        No matches found for &quot;{searchQuery}&quot;
                       </Text>
                     </View>
                   ) : (
@@ -200,15 +201,15 @@ export default function ExploreScreen() {
                       key={IS_TABLET ? 'tablet-grid' : 'mobile-grid'}
                       numColumns={IS_TABLET ? 3 : 2}
                       showsVerticalScrollIndicator={false}
-                      contentContainerClassName="pb-16"
+                      contentContainerClassName="pb-24"
                       columnWrapperClassName="justify-between"
                       keyExtractor={(item) => item._id}
                       renderItem={({ item }: { item: SubService }) => (
                         <Pressable
-                          onPress={() => router.push(`/services/${item.slug}` as any)}
+                          onPress={() => router.push(`/services/${item.slug}`)}
                           className="w-[48.5%] md:w-[31.5%] bg-white rounded-3xl p-2.5 mb-4 border border-slate-100 shadow-sm shadow-slate-100/50 items-center active:scale-[0.98]"
                         >
-                          {/* Image Box: Utilizes aspect-[4/3] so heights expand/shrink accurately alongside changing widths */}
+                          {/* Image Box */}
                           <View className="w-full aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 mb-2.5">
                             <Image
                               source={{ uri: item.image || 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=300' }}
