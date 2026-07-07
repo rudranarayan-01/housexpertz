@@ -1,9 +1,8 @@
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { MotiView } from 'moti';
 import React from 'react';
-import { Image, Pressable, ScrollView, StatusBar, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StatusBar, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
@@ -11,6 +10,10 @@ export default function ProfileScreen() {
   const { user } = useUser();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+
+  // Responsive breakpoints
+  const isTablet = width >= 768;
 
   const handleSignOut = async () => {
     try {
@@ -21,7 +24,6 @@ export default function ProfileScreen() {
     }
   };
 
-  // Fallback layout metadata if auth layers are bypassed
   const userMetadata = {
     name: user?.fullName || 'Guest Account',
     email: user?.primaryEmailAddress?.emailAddress || 'Log in to sync schedules',
@@ -30,79 +32,88 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1 bg-slate-50">
+      {/* Light text matching dark header background */}
       <StatusBar barStyle="light-content" backgroundColor="#0B132B" animated />
 
-      {/* 1. HERO IDENTITY BRAND CURVED HEADER LAYER */}
-      <View className="bg-[#0B132B] pt-14 pb-12 px-6 rounded-b-[40px] z-10 shadow-lg">
-        <View className="max-w-7xl mx-auto w-full flex-row items-center">
-          <View className="relative">
-            <Image
-              source={{ uri: userMetadata.avatar }}
-              className="w-18 h-18 rounded-3xl bg-slate-800 border-2 border-white/20"
-            />
-            <View className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-[#0B132B] items-center justify-center">
-              <View className="w-1.5 h-1.5 bg-white rounded-full" />
-            </View>
-          </View>
-
-          <View className="flex-1 ml-4 pr-2">
-            <Text className="text-white text-xl font-black tracking-tight" numberOfLines={1}>
-              {userMetadata.name}
-            </Text>
-            <Text className="text-slate-400 text-xs font-semibold mt-0.5" numberOfLines={1}>
-              {userMetadata.email}
-            </Text>
-          </View>
-
-          {isSignedIn && (
-            <Pressable
-              onPress={() => router.push('/profile/edit')}
-              className="w-9 h-9 bg-white/10 rounded-xl items-center justify-center border border-white/10 active:scale-95"
-            >
-              <Ionicons name="create-outline" size={16} color="white" />
-            </Pressable>
-          )}
-        </View>
-      </View>
-
-      {/* MAIN LAYOUT BODY */}
       <ScrollView
-        className="flex-1 -mt-5 z-20"
+        className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerClassName="pb-36"
+        contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
       >
-        <View className="max-w-7xl mx-auto w-full px-5">
+        {/* 1. HERO IDENTITY BRAND CURVED HEADER LAYER */}
+        <View
+          className="bg-[#0B132B] px-6 rounded-b-[48px] shadow-xl shadow-slate-900/10"
+          style={{ paddingTop: insets.top + 24, paddingBottom: isTablet ? 56 : 44 }}
+        >
+          <View className="max-w-4xl mx-auto w-full flex-row items-center justify-between">
+            <View className="flex-row items-center flex-1">
+              <View className="relative shadow-md">
+                <Image
+                  source={{ uri: userMetadata.avatar }}
+                  className="rounded-2xl bg-slate-800 border-2 border-white/15"
+                  style={{ width: isTablet ? 80 : 64, height: isTablet ? 80 : 64 }}
+                />
+                <View className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-[#0B132B] items-center justify-center" />
+              </View>
+
+              <View className="flex-1 ml-4 md:ml-6 pr-2">
+                <Text
+                  className="text-white font-black tracking-tight"
+                  style={{ fontSize: isTablet ? 24 : 18 }}
+                  numberOfLines={1}
+                >
+                  {userMetadata.name}
+                </Text>
+                <Text
+                  className="text-slate-400 font-medium mt-1"
+                  style={{ fontSize: isTablet ? 14 : 12 }}
+                  numberOfLines={1}
+                >
+                  {userMetadata.email}
+                </Text>
+              </View>
+            </View>
+
+            {isSignedIn && (
+              <Pressable
+                onPress={() => router.push('/profile/edit')}
+                className="w-10 h-10 bg-white/10 rounded-xl items-center justify-center border border-white/10 active:opacity-70"
+              >
+                <Ionicons name="create-outline" size={18} color="white" />
+              </Pressable>
+            )}
+          </View>
+        </View>
+
+        {/* MAIN LAYOUT CONTAINER */}
+        <View className="max-w-4xl mx-auto w-full px-5 -mt-6">
 
           {/* QUICK METRICS HIGHLIGHT ROW */}
-          <MotiView
-            from={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-3xl p-4 flex-row justify-between items-center shadow-sm border border-slate-100"
-          >
+          <View className="bg-white rounded-3xl p-5 flex-row justify-between items-center shadow-sm border border-slate-100">
             <Pressable
               onPress={() => router.push('/(tabs)/bookings')}
               className="flex-1 items-center py-1 border-r border-slate-100"
             >
-              <Text className="text-blue-600 text-lg font-black tracking-tight">3 Active</Text>
-              <Text className="text-slate-400 text-[10px] font-bold uppercase mt-0.5">Bookings</Text>
+              <Text className="text-blue-600 text-lg md:text-xl font-black tracking-tight">3 Active</Text>
+              <Text className="text-slate-400 text-[10px] md:text-xs font-bold uppercase mt-1 tracking-wider">Bookings</Text>
             </Pressable>
 
             <Pressable
               onPress={() => router.push('/profile/addresses')}
               className="flex-1 items-center py-1 border-r border-slate-100"
             >
-              <Text className="text-[#0B132B] text-lg font-black tracking-tight">2 Saved</Text>
-              <Text className="text-slate-400 text-[10px] font-bold uppercase mt-0.5">Addresses</Text>
+              <Text className="text-[#0B132B] text-lg md:text-xl font-black tracking-tight">2 Saved</Text>
+              <Text className="text-slate-400 text-[10px] md:text-xs font-bold uppercase mt-1 tracking-wider">Addresses</Text>
             </Pressable>
 
             <View className="flex-1 items-center py-1">
-              <Text className="text-emerald-600 text-lg font-black tracking-tight">₹150</Text>
-              <Text className="text-slate-400 text-[10px] font-bold uppercase mt-0.5">Wallet Cash</Text>
+              <Text className="text-emerald-600 text-lg md:text-xl font-black tracking-tight">₹150</Text>
+              <Text className="text-slate-400 text-[10px] md:text-xs font-bold uppercase mt-1 tracking-wider">Wallet Cash</Text>
             </View>
-          </MotiView>
+          </View>
 
-          {/* SECTION I: ACCOUNT NAVIGATION GROUPS */}
-          <Text className="text-[#0B132B]/60 font-black text-[10px] uppercase tracking-wider ml-2 mt-6 mb-2">
+          {/* SECTION I: ACCOUNT MANAGEMENT */}
+          <Text className="text-[#0B132B]/50 font-black text-[11px] md:text-xs uppercase tracking-widest ml-2 mt-8 mb-3">
             Account Management
           </Text>
 
@@ -114,6 +125,7 @@ export default function ProfileScreen() {
               title="My Bookings"
               subtitle="Track schedules and download invoices"
               onPress={() => router.push('/(tabs)/bookings')}
+              isTablet={isTablet}
             />
             <ProfileOptionRow
               icon="location"
@@ -122,6 +134,7 @@ export default function ProfileScreen() {
               title="Manage Saved Addresses"
               subtitle="Configure your delivery coordinates"
               onPress={() => router.push('/profile/addresses')}
+              isTablet={isTablet}
             />
             <ProfileOptionRow
               icon="settings"
@@ -130,12 +143,13 @@ export default function ProfileScreen() {
               title="Settings"
               subtitle="App preferences and notifications"
               onPress={() => router.push('/profile/settings')}
+              isTablet={isTablet}
               isLast
             />
           </View>
 
-          {/* SECTION II: PREMIUM COMPLEMENTARY HUB ELEMENTS */}
-          <Text className="text-[#0B132B]/60 font-black text-[10px] uppercase tracking-wider ml-2 mt-6 mb-2">
+          {/* SECTION II: SUPPORT & LEGAL */}
+          <Text className="text-[#0B132B]/50 font-black text-[11px] md:text-xs uppercase tracking-widest ml-2 mt-8 mb-3">
             Support & Legal
           </Text>
 
@@ -146,7 +160,8 @@ export default function ProfileScreen() {
               bgColor="bg-amber-50"
               title="Help & Support Desk"
               subtitle="24/7 priority live-chat assistance"
-              onPress={() => console.log('Opening Help Desk Intercom Terminal')}
+              onPress={() => console.log('Opening Help Desk')}
+              isTablet={isTablet}
             />
             <ProfileOptionRow
               icon="shield-checkmark"
@@ -154,17 +169,27 @@ export default function ProfileScreen() {
               bgColor="bg-indigo-50"
               title="Privacy Policy"
               subtitle="Review account protection guidelines"
-              onPress={() => console.log('Routing to baseline Privacy Markdown')}
+              onPress={() => router.push('/profile/privacy-policy')} // Points to privacy-policy.tsx
+              isTablet={isTablet}
+            />
+            <ProfileOptionRow
+              icon="document-text"
+              iconColor="#EC4899"
+              bgColor="bg-pink-50"
+              title="Terms & Conditions"
+              subtitle="Read platform usage agreement rules"
+              onPress={() => router.push('/profile/terms-conditions')} // Points to terms-conditions.tsx
+              isTablet={isTablet}
               isLast
             />
           </View>
 
           {/* AUTH TRANSACTION TRIGGER STRIPS */}
-          <View className="mt-8 px-2">
+          <View className="mt-10 px-1">
             {isSignedIn ? (
               <Pressable
                 onPress={handleSignOut}
-                className="w-full h-14 bg-red-50 border border-red-200/60 rounded-2xl flex-row items-center justify-center active:bg-red-100/80 active:scale-98 transition-all"
+                className="w-full h-14 bg-red-50 border border-red-200/50 rounded-2xl flex-row items-center justify-center active:bg-red-100/70 transition-colors"
               >
                 <Ionicons name="log-out-outline" size={18} color="#EF4444" />
                 <Text className="text-red-600 font-black text-sm tracking-tight ml-2">
@@ -174,7 +199,7 @@ export default function ProfileScreen() {
             ) : (
               <Pressable
                 onPress={() => router.push('/(auth)')}
-                className="w-full h-14 bg-blue-600 rounded-2xl flex-row items-center justify-center shadow-lg shadow-blue-600/20 active:scale-98 transition-all"
+                className="w-full h-14 bg-blue-600 rounded-2xl flex-row items-center justify-center shadow-md shadow-blue-600/10 active:bg-blue-700 transition-colors"
               >
                 <Ionicons name="log-in-outline" size={18} color="white" />
                 <Text className="text-white font-black text-sm tracking-tight ml-2">
@@ -182,7 +207,7 @@ export default function ProfileScreen() {
                 </Text>
               </Pressable>
             )}
-            <Text className="text-center text-slate-300 text-[10px] font-bold uppercase tracking-widest mt-4">
+            <Text className="text-center text-slate-300 text-[10px] font-bold uppercase tracking-widest mt-6">
               HouseXpertz Terminal • v1.2.0
             </Text>
           </View>
@@ -193,36 +218,49 @@ export default function ProfileScreen() {
   );
 }
 
-// SHARED ROW PRESENTATION COMPONENT TYPING
+// PREMIUM OPTION ROW
 interface ProfileOptionRowProps {
-  // FIXED: Changed from keyof typeof Ionicons.images to look up valid names from Expo Vector Icons
   icon: React.ComponentProps<typeof Ionicons>['name'] | string;
   iconColor: string;
   bgColor: string;
   title: string;
   subtitle: string;
   onPress: () => void;
+  isTablet: boolean;
   isLast?: boolean;
 }
 
-function ProfileOptionRow({ icon, iconColor, bgColor, title, subtitle, onPress, isLast }: ProfileOptionRowProps) {
+function ProfileOptionRow({ icon, iconColor, bgColor, title, subtitle, onPress, isTablet, isLast }: ProfileOptionRowProps) {
   return (
     <Pressable
       onPress={onPress}
-      className={`flex-row items-center py-4 px-3 active:bg-slate-50 border-b border-slate-100 last:border-b-0 ${isLast ? 'border-b-0' : ''
+      className={`flex-row items-center py-4 px-3 active:bg-slate-50 border-b border-slate-100 ${isLast ? 'border-b-0' : ''
         }`}
     >
-      <View className={`w-10 h-10 ${bgColor} rounded-xl items-center justify-center`}>
+      <View
+        className={`rounded-xl items-center justify-center ${bgColor}`}
+        style={{ width: isTablet ? 48 : 40, height: isTablet ? 48 : 40 }}
+      >
         {icon === 'headset' ? (
-          <FontAwesome6 name="headset" size={14} color={iconColor} />
+          <FontAwesome6 name="headset" size={isTablet ? 16 : 14} color={iconColor} />
         ) : (
-          <Ionicons name={icon as any} size={18} color={iconColor} />
+          <Ionicons name={icon as any} size={isTablet ? 20 : 18} color={iconColor} />
         )}
       </View>
 
       <View className="flex-1 ml-4 pr-4">
-        <Text className="text-[#0B132B] text-sm font-black tracking-tight">{title}</Text>
-        <Text className="text-slate-400 text-[11px] font-semibold mt-0.5 leading-none">{subtitle}</Text>
+        <Text
+          className="text-[#0B132B] font-black tracking-tight"
+          style={{ fontSize: isTablet ? 15 : 13 }}
+        >
+          {title}
+        </Text>
+        <Text
+          className="text-slate-400 font-medium mt-0.5 leading-none"
+          style={{ fontSize: isTablet ? 12 : 11 }}
+        >
+          {subtitle}
+        </Text>
       </View>
 
       <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
