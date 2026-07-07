@@ -2,6 +2,8 @@
 
 # dependencies
 node_modules/
+housexpertz-firebase-adminsdk-fbsvc-67bcac0e3f.json
+google-services.json
 
 # Expo
 .expo/

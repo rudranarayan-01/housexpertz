@@ -49,8 +49,8 @@ export const notificationService = {
       const tokenData = await Notifications.getExpoPushTokenAsync({
         projectId,
       });
-
-      return tokenData.data; // This is the actual string token (Ex: ExponentPushToken[xxx])
+      console.log('Push token retrieved:', tokenData.data);
+      return tokenData.data;
     } catch (error) {
       console.error("Error fetching push token:", error);
       return null;
