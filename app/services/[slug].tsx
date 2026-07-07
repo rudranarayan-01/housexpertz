@@ -1,18 +1,25 @@
 import { BookingService, ServiceVariant } from '@/services/booking.service';
 import { Offer, OffersService } from '@/services/offers.service';
+import { useCartStore } from '@/store/cart.store';
 import { FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Dimensions, Image, Pressable, ScrollView, StatusBar, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IS_TABLET = SCREEN_WIDTH >= 768;
 
 export default function ServiceDetailScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { slug } = useLocalSearchParams<{ slug: string }>();
+  
+  // Connect state mutations from our core Zustand state machine context
+  const addItem = useCartStore((state) => state.addItem);
+  const cartItems = useCartStore((state) => state.cartItems);
 
   const { data: service, isLoading: isLoadingService, isError: isServiceError } = useQuery({
     queryKey: ['serviceDetail', slug],
@@ -27,7 +34,7 @@ export default function ServiceDetailScreen() {
 
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
 
-  useMemo(() => {
+  useEffect(() => {
     if (service?.variants && service.variants.length > 0 && !selectedVariantId) {
       setSelectedVariantId(service.variants[0]._id);
     }
@@ -41,6 +48,41 @@ export default function ServiceDetailScreen() {
     }
     return service.price || service.basePrice;
   }, [service, selectedVariantId]);
+
+  // FIXED: Derive state dynamically from global data layer to keep layout sync stable
+  const selectedVariant = useMemo(() => {
+    return service?.variants?.find(v => v._id === selectedVariantId);
+  }, [service, selectedVariantId]);
+
+  const isAlreadyInCart = useMemo(() => {
+    if (!service) return false;
+    return cartItems.some(
+      (item) => item.id === service._id && item.variantTitle === (selectedVariant?.title || null)
+    );
+  }, [cartItems, service, selectedVariant]);
+
+  const handleAddToCart = () => {
+    if (!service) return;
+
+    // If item variant is already in store context, safely route right away
+    if (isAlreadyInCart) {
+      router.push('/(tabs)/cart');
+      return;
+    }
+
+    const cartPayload = {
+      id: service._id,
+      name: service.name,
+      variantTitle: selectedVariant?.title || null,
+      price: activePrice,
+      image: service.image,
+      category: service.category?.name || 'General'
+    };
+
+    // FIXED: Actually dispatch payload into Zustand globally
+    addItem(cartPayload);
+    console.log('Successfully added payload to Zustand context store:', cartPayload);
+  };
 
   if (isLoadingService) {
     return (
@@ -66,14 +108,13 @@ export default function ServiceDetailScreen() {
 
   return (
     <View className="flex-1 bg-slate-50">
-      {/* Explicitly configuring StatusBar options */}
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" animated />
       
-      {/* Content wrapper without max-w-3xl layout constraint */}
       <View className="w-full h-full bg-slate-50 relative">
-        
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-36">
-          
+        <ScrollView 
+          showsVerticalScrollIndicator={false} 
+          contentContainerClassName="pb-44"
+        >
           {/* BANNER MEDIA CONTAINER */}
           <View style={{ height: IS_TABLET ? 440 : 288 }} className="relative w-full bg-slate-900">
             <Image 
@@ -101,7 +142,7 @@ export default function ServiceDetailScreen() {
             </View>
           </View>
 
-          {/* MAIN PAGE BODY - CENTERED WITH INNER MAX-WIDTH TO SHIELD ULTRA-WIDE MONITORS */}
+          {/* MAIN PAGE BODY */}
           <View className="max-w-7xl mx-auto w-full md:px-6 -mt-6 z-10">
             
             {/* SERVICE CORE OVERVIEW DETAILS */}
@@ -139,7 +180,7 @@ export default function ServiceDetailScreen() {
               </View>
             </View>
 
-            {/* OFFERS VIEW CAROUSEL MODULE */}
+            {/* OFFERS MODULE */}
             {offersData?.offers && offersData.offers.length > 0 && (
               <View className="bg-white px-5 md:px-8 py-6 mt-4 md:rounded-3xl border-y md:border border-slate-100 shadow-sm">
                 <Text className="text-[#0B132B] font-black text-sm uppercase tracking-wider mb-3">
@@ -171,7 +212,7 @@ export default function ServiceDetailScreen() {
               </View>
             )}
 
-            {/* SELECTION VARIANT OPTIONS PACKAGES */}
+            {/* SELECTION VARIANT OPTIONS */}
             {service.pricingType === 'variant' && service.variants && service.variants.length > 0 && (
               <View className="bg-white px-5 md:px-8 py-6 mt-4 md:rounded-3xl border-y md:border border-slate-100 shadow-sm">
                 <Text className="text-[#0B132B] font-black text-sm uppercase tracking-wider mb-3">
@@ -183,7 +224,9 @@ export default function ServiceDetailScreen() {
                   return (
                     <Pressable
                       key={v._id}
-                      onPress={() => setSelectedVariantId(v._id)}
+                      onPress={() => {
+                        setSelectedVariantId(v._id);
+                      }}
                       className={`flex-row items-center justify-between p-4 mb-3 rounded-2xl border transition-all ${
                         isSelected ? 'bg-blue-50/50 border-blue-500' : 'bg-slate-50 border-slate-200/60'
                       }`}
@@ -235,15 +278,18 @@ export default function ServiceDetailScreen() {
           </View>
         </ScrollView>
 
-        {/* BOTTOM STICKY TRANSACTION FOOTER BAR */}
+        {/* BOTTOM STICKY TRANSACTION FOOTER BAR WITH STRUCTURAL INSET PROTECTION */}
         <MotiView 
-          from={{ translateY: 100 }}
+          from={{ translateY: 120 }}
           animate={{ translateY: 0 }}
-          className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 md:px-12 pt-4 pb-8 z-20 shadow-2xl"
+          style={{
+            paddingBottom: insets.bottom > 0 ? insets.bottom + 12 : 24,
+          }}
+          className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 md:px-12 pt-4 z-20 shadow-2xl"
         >
           <View className="max-w-7xl mx-auto w-full flex-row items-center justify-between">
             <View className="flex-1">
-              <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Total Booking Price</Text>
+              <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Price</Text>
               <View className="flex-row items-baseline mt-0.5">
                 <Text className="text-[#0B132B] text-2xl md:text-3xl font-black">₹{activePrice}</Text>
                 {service.unitName && (
@@ -253,11 +299,15 @@ export default function ServiceDetailScreen() {
             </View>
 
             <Pressable 
-              onPress={() => console.log('Proceeding with transaction package configuration...')}
-              className="bg-blue-600 active:bg-blue-700 h-14 rounded-2xl px-6 flex-row items-center justify-center shadow-lg shadow-blue-600/20 flex-1 max-w-xs ml-4 active:scale-95 transition-all"
+              onPress={handleAddToCart}
+              className={`h-14 rounded-2xl px-6 flex-row items-center justify-center shadow-lg flex-1 max-w-xs ml-4 active:scale-95 transition-all ${
+                isAlreadyInCart ? 'bg-emerald-600 shadow-emerald-600/20' : 'bg-blue-600 shadow-blue-600/20'
+              }`}
             >
-              <Text className="text-white font-black text-sm md:text-base tracking-tight mr-2">Book Service</Text>
-              <Ionicons name="arrow-forward" size={16} color="white" />
+              <Text className="text-white font-black text-sm md:text-base tracking-tight mr-2">
+                {isAlreadyInCart ? 'Go to Cart' : 'Add to Cart'}
+              </Text>
+              <Ionicons name={isAlreadyInCart ? "arrow-forward" : "cart"} size={18} color="white" />
             </Pressable>
           </View>
         </MotiView>

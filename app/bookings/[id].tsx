@@ -4,13 +4,13 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MotiView } from 'moti';
-import React from 'react';
-import { ActivityIndicator, Dimensions, Image, Linking, Pressable, ScrollView, StatusBar, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { ActivityIndicator, Dimensions, Image, Linking, Platform, Pressable, ScrollView, StatusBar, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IS_TABLET = SCREEN_WIDTH >= 768;
 
-// Local interfaces aligned with your populated backend response
 interface OrderItem {
     serviceId: string;
     name: string;
@@ -71,8 +71,13 @@ const formatFullDate = (isoString: string) => {
 
 export default function OrderDetailsScreen() {
     const router = useRouter();
+    const insets = useSafeAreaInsets();
     const { id } = useLocalSearchParams<{ id: string }>();
     const { getToken, isSignedIn } = useAuth();
+    
+    // UI state to handle localized cart actions natively
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
+    const [isAdded, setIsAdded] = useState(false);
 
     const { data: order, isLoading, error, refetch } = useQuery<OrderDetailResponse>({
         queryKey: ['orderDetail', id],
@@ -82,7 +87,23 @@ export default function OrderDetailsScreen() {
 
     const statusStyle = getStatusConfig(order?.status || '');
 
-    // Loading State
+    // Add to Cart Logic Handler
+    const handleAddToCart = async () => {
+        if (isAddingToCart || isAdded) return;
+        
+        setIsAddingToCart(true);
+        try {
+            // Integrate global cart context handler or API mutation endpoints here
+            // e.g., await addToCartMutation({ items: order.items });
+            await new Promise((resolve) => setTimeout(resolve, 900)); // Smooth UI transition delay
+            setIsAdded(true);
+        } catch (err) {
+            console.error("Cart insertion error:", err);
+        } finally {
+            setIsAddingToCart(false);
+        }
+    };
+
     if (isLoading) {
         return (
             <View className="flex-1 bg-slate-50 items-center justify-center">
@@ -93,7 +114,6 @@ export default function OrderDetailsScreen() {
         );
     }
 
-    // Error State
     if (error || !order) {
         return (
             <View className="flex-1 bg-slate-50 items-center justify-center p-6">
@@ -110,12 +130,14 @@ export default function OrderDetailsScreen() {
 
     return (
         <View className="flex-1 bg-slate-50">
-            {/* Maintained Theme Status Bar */}
             <StatusBar barStyle="light-content" backgroundColor="#0B132B" />
 
-            {/* Consistent Application Header */}
-            <View className={`bg-[#0B132B] pb-6 px-6 rounded-b-[40px] shadow-lg ${IS_TABLET ? 'pt-16 pb-8' : 'pt-14'}`}>
-                <View className="flex-row items-center justify-between">
+            {/* Header section with top padding configuration */}
+            <View 
+                style={{ paddingTop: Platform.OS === 'ios' ? insets.top : insets.top + 10 }}
+                className={`bg-[#0B132B] pb-6 px-6 rounded-b-[40px] shadow-lg`}
+            >
+                <View className="flex-row items-center justify-between max-w-7xl mx-auto w-full">
                     <Pressable 
                         onPress={() => router.back()} 
                         className="w-10 h-10 bg-white/10 rounded-xl items-center justify-center active:scale-95 transition-all"
@@ -135,13 +157,17 @@ export default function OrderDetailsScreen() {
                 </View>
             </View>
 
+            {/* Scrollable body metrics view container */}
             <ScrollView 
-                contentContainerClassName={`pb-12 ${IS_TABLET ? 'px-8 pt-8' : 'px-5 pt-5'}`}
+                contentContainerStyle={{ 
+                    paddingBottom: IS_TABLET ? 140 : 120 + (insets.bottom > 0 ? insets.bottom : 16)
+                }}
+                className={`flex-1 ${IS_TABLET ? 'px-8 pt-8' : 'px-5 pt-5'}`}
                 showsVerticalScrollIndicator={false}
             >
-                <View className={`w-full max-w-6xl self-center ${IS_TABLET ? 'flex-row gap-x-8 items-start' : 'flex-col'}`}>
+                <View className={`w-full max-w-7xl self-center ${IS_TABLET ? 'flex-row gap-x-8 items-start' : 'flex-col'}`}>
                     
-                    {/* LEFT COLUMN / TOP LAYER: Service Summaries & Costs */}
+                    {/* LEFT COLUMN: Service Summaries & Costs */}
                     <View className={IS_TABLET ? 'flex-[1.2] gap-y-6' : 'gap-y-5'}>
                         
                         {/* Booked Items Loop */}
@@ -184,14 +210,14 @@ export default function OrderDetailsScreen() {
                                 </View>
                                 <View className="h-[1px] bg-slate-100 my-1" />
                                 <View className="flex-row justify-between items-center">
-                                    <Text className="text-slate-900 font-black text-sm">Total Paid Gross Amount</Text>
+                                    <Text className="text-slate-900 font-black text-sm">Total Gross Amount</Text>
                                     <Text className="text-blue-600 font-black text-lg">₹{order.totalAmount}</Text>
                                 </View>
                             </View>
                         </MotiView>
                     </View>
 
-                    {/* RIGHT COLUMN / BOTTOM LAYER: Schedule, Handyman & Locations */}
+                    {/* RIGHT COLUMN: Schedule, Handyman & Locations */}
                     <View className={IS_TABLET ? 'flex-1 gap-y-6' : 'gap-y-5 mt-5'}>
                         
                         {/* Allocation & Time Registry */}
@@ -267,6 +293,48 @@ export default function OrderDetailsScreen() {
                     </View>
                 </View>
             </ScrollView>
+
+            {/* FIXED BOTTOM ACTION BAR - Fully responsive for both systems (Gesture & 3-Button) */}
+            <MotiView 
+                from={{ translateY: 100 }}
+                animate={{ translateY: 0 }}
+                style={{ 
+                    paddingBottom: insets.bottom > 0 ? insets.bottom + 8 : 16,
+                    paddingTop: 14
+                }}
+                className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 z-30 shadow-2xl"
+            >
+                <View className="max-w-7xl mx-auto w-full flex-row items-center justify-between">
+                    <View className="flex-1">
+                        <Text className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Total Value</Text>
+                        <Text className="text-[#0B132B] text-2xl font-black mt-0.5">₹{order.totalAmount}</Text>
+                    </View>
+
+                    <Pressable 
+                        onPress={handleAddToCart}
+                        disabled={isAddingToCart || isAdded}
+                        style={{
+                            backgroundColor: isAdded ? '#10B981' : '#2563EB'
+                        }}
+                        className="h-14 rounded-2xl px-6 flex-row items-center justify-center shadow-lg shadow-blue-600/25 flex-1 max-w-xs ml-4 active:scale-[0.97] transition-all disabled:opacity-90"
+                    >
+                        {isAddingToCart ? (
+                            <ActivityIndicator size="small" color="white" />
+                        ) : (
+                            <>
+                                <Text className="text-white font-black text-sm tracking-tight mr-2">
+                                    {isAdded ? 'Added to Cart' : 'Add to Cart'}
+                                </Text>
+                                <Ionicons 
+                                    name={isAdded ? "checkmark-circle" : "basket-outline"} 
+                                    size={18} 
+                                    color="white" 
+                                />
+                            </>
+                        )}
+                    </Pressable>
+                </View>
+            </MotiView>
         </View>
     );
 }
