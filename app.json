@@ -14,7 +14,8 @@
     },
     "android": {
       "package": "com.housexpertz.app",
-      "googleServicesFile": "./google-services.json", 
+      "googleServicesFile": "./google-services.json",
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "backgroundColor": "#0B132B",
         "foregroundImage": "./assets/images/icon.png"

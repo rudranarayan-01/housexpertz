@@ -6,6 +6,7 @@ import { Redirect, Stack, useSegments } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useSyncUser } from "@/hooks/useSyncUser";
 import { setAuthTokenGetter } from "@/lib/api/client";
 import { useEffect } from "react";
 import "./global.css";
@@ -47,6 +48,7 @@ function AppInitializer() {
   }, [getToken, isLoaded, isSignedIn]);
 
   usePushNotifications();
+  useSyncUser()
 
   return null;
 }
