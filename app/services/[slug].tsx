@@ -1,6 +1,7 @@
-import { BookingService, ServiceVariant } from '@/services/booking.service';
+import { BookingService } from '@/services/booking.service';
 import { Offer, OffersService } from '@/services/offers.service';
 import { useCartStore } from '@/store/cart.store';
+import { ServiceVariant } from '@/types/service.types';
 import { FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -301,7 +302,7 @@ export default function ServiceDetailScreen() {
             <Pressable 
               onPress={handleAddToCart}
               className={`h-14 rounded-2xl px-6 flex-row items-center justify-center shadow-lg flex-1 max-w-xs ml-4 active:scale-95 transition-all ${
-                isAlreadyInCart ? 'bg-emerald-600 shadow-emerald-600/20' : 'bg-blue-600 shadow-blue-600/20'
+                isAlreadyInCart ? 'bg-emerald-600 shadow-emerald-600/20' : 'bg-[#0B132B] shadow-blue-600/20'
               }`}
             >
               <Text className="text-white font-black text-sm md:text-base tracking-tight mr-2">

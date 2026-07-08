@@ -100,13 +100,13 @@ export default function CartScreen() {
                     <View className="w-20 h-20 bg-white border border-slate-100 rounded-full items-center justify-center mb-4 shadow-sm">
                         <Ionicons name="cart-outline" size={36} color="#94A3B8" />
                     </View>
-                    <Text className="text-[#0B132B] font-black text-lg tracking-tight">Your Cart is Empty</Text>
+                    {/* <Text className="text-[#0B132B] font-black text-lg tracking-tight">Your Cart is Empty</Text> */}
                     <Text className="text-slate-400 text-xs text-center font-medium mt-1 max-w-[260px]">
                         Looks like you haven&apos;t added any professional services to your dashboard yet.
                     </Text>
                     <Pressable
                         onPress={() => router.push('/(tabs)')}
-                        className="mt-6 bg-blue-600 px-6 h-12 rounded-xl items-center justify-center shadow-md shadow-blue-600/20 active:scale-95"
+                        className="mt-6 bg-[#0B132B] px-6 h-12 rounded-xl items-center justify-center shadow-md shadow-blue-600/20 active:scale-95"
                     >
                         <Text className="text-white font-black text-xs uppercase tracking-wider">Explore Services</Text>
                     </Pressable>
@@ -204,7 +204,7 @@ export default function CartScreen() {
 
                             <Pressable
                                 onPress={handleCheckout}
-                                className="bg-blue-600 active:bg-blue-700 h-14 rounded-2xl px-6 flex-row items-center justify-center shadow-lg shadow-blue-600/20 flex-1 max-w-xs ml-4 active:scale-98 transition-all"
+                                className="bg-blue-600 active:bg-[#0B132B] h-14 rounded-2xl px-6 flex-row items-center justify-center shadow-lg shadow-blue-600/20 flex-1 max-w-xs ml-4 active:scale-98 transition-all"
                             >
                                 <Text className="text-white font-black text-sm md:text-base tracking-tight mr-2">
                                     {isSignedIn ? 'Place Order' : 'Login to Book'}

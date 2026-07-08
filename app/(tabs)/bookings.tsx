@@ -6,16 +6,16 @@ import { useRouter } from "expo-router";
 import { MotiView } from "moti";
 import React, { useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    Linking,
-    Pressable,
-    RefreshControl,
-    StatusBar,
-    Text,
-    useWindowDimensions,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Linking,
+  Pressable,
+  RefreshControl,
+  StatusBar,
+  Text,
+  useWindowDimensions,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -245,7 +245,7 @@ export default function BookingsScreen() {
           }}
         >
           <View className="w-16 h-16 rounded-3xl bg-[#0B132B] items-center justify-center mb-5">
-            <Text className="text-white text-xl font-black">HX</Text>
+            <Text className="text-white text-xl font-black">HS</Text>
           </View>
 
           <Text className="text-[#0B132B] text-xl font-black text-center tracking-tight">
