@@ -1,99 +1,34 @@
-import api from '@/utils/api';
+import api from "@/lib/api/client";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
+import {
+    CategoryServicesResponse,
+    CategoryStat,
+    ServiceDetailResponse,
+    TopBookedService,
+} from "@/types/service.types";
 
-export interface TopBookedService {
-    _id: string;
-    name: string;
-    slug: string;
-    basePrice: number;
-    pricingType: string;
-    image: string;
-    rating: number;
-    bookingCount?: number;
-}
-
-export interface CategoryStat {
-    _id: string;
-    count: number;
-    name: string;
-    slug: string;
-    categoryImage: string;
-    description: string;
-}
-
-export interface CategoryDetail {
-    _id: string;
-    name: string;
-    slug: string;
-    image: string;
-    description?: string;
-}
-
-export interface SubService {
-    _id: string;
-    name: string;
-    slug: string;
-    description: string;
-    basePrice: number;
-    pricingType: 'fixed' | 'hourly' | string; // maps to your backend models
-    unitName: string;                         // e.g., "per appliance", "per visit"
-    image: string;
-    rating: number;
-    seo?: Record<string, any>;
-}
-
-// The direct JSON output signature returned by this specific controller
-export interface CategoryServicesResponse {
-    category: CategoryDetail;
-    services: SubService[];
-}
-
-export interface ServiceVariant {
-    _id: string;
-    title: string;
-    price: number;
-}
-
-export interface ServiceDetailResponse {
-    _id: string;
-    name: string;
-    slug: string;
-    description: string;
-    image: string;
-    rating: number;
-    duration?: string;
-    basePrice: number;
-    price: number;
-    pricingType: 'fixed' | 'variant' | string;
-    unitName?: string;
-    variants?: ServiceVariant[];
-    category: {
-        _id: string;
-        name: string;
-        slug: string;
-    };
-    numReviews: number;
-}
-
-// Extend your BookingService object
 export const BookingService = {
+  async getTopBooked(): Promise<TopBookedService[]> {
+    const response = await api.get(API_ENDPOINTS.services.topBooked);
+    return response.data;
+  },
 
-    getTopBooked: async (): Promise<TopBookedService[]> => {
-        const response = await api.get('/services/top-booked');
-        return response.data;
-    },
+  async getCategoryStats(): Promise<CategoryStat[]> {
+    const response = await api.get(API_ENDPOINTS.services.categoryStats);
+    return response.data;
+  },
 
-    getCategoryStats: async (): Promise<CategoryStat[]> => {
-        const response = await api.get('/services/category-stats');
-        return response.data;
-    },
+  async getServicesByCategorySlug(
+    categorySlug: string,
+  ): Promise<CategoryServicesResponse> {
+    const response = await api.get(
+      API_ENDPOINTS.services.byCategorySlug(categorySlug),
+    );
+    return response.data;
+  },
 
-    getServicesByCategorySlug: async (categorySlug: string): Promise<CategoryServicesResponse> => {
-        const response = await api.get(`/services/category/slug/${categorySlug}`);
-        return response.data;
-    },
-
-    getServiceDetailsBySlug: async (slug: string): Promise<ServiceDetailResponse> => {
-        const response = await api.get(`/services/details/${slug}`);
-        return response.data;
-    },
+  async getServiceDetailsBySlug(slug: string): Promise<ServiceDetailResponse> {
+    const response = await api.get(API_ENDPOINTS.services.detailsBySlug(slug));
+    return response.data;
+  },
 };

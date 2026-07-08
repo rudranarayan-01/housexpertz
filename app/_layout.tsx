@@ -6,6 +6,8 @@ import { Redirect, Stack, useSegments } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { setAuthTokenGetter } from "@/lib/api/client";
+import { useEffect } from "react";
 import "./global.css";
 
 Notifications.setNotificationHandler({
@@ -35,7 +37,17 @@ if (!CLERK_PUBLISHABLE_KEY) {
 }
 
 function AppInitializer() {
+  const { getToken, isSignedIn, isLoaded } = useAuth();
+  useEffect(() => {
+    if (!isLoaded) return;
+    setAuthTokenGetter(async () => {
+      if (!isSignedIn) return null;
+      return await getToken();
+    });
+  }, [getToken, isLoaded, isSignedIn]);
+
   usePushNotifications();
+
   return null;
 }
 
