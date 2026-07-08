@@ -18,8 +18,10 @@ export default function TabsLayout() {
           tabBarStyle: {
             backgroundColor: "#FFFFFF",
             borderTopColor: "#F1F5F9",
-            // Compensates layout values based on native button overlays
-            height: Platform.OS === 'ios' ? 52 + insets.bottom : 64 + (insets.bottom > 0 ? insets.bottom : 0),
+            height:
+              Platform.OS === "ios"
+                ? 52 + insets.bottom
+                : 64 + (insets.bottom > 0 ? insets.bottom : 0),
             paddingBottom: insets.bottom > 0 ? insets.bottom : 12,
             paddingTop: 10,
             elevation: 10,
@@ -32,7 +34,7 @@ export default function TabsLayout() {
             fontSize: 11,
             fontWeight: "700",
             letterSpacing: -0.1,
-            marginBottom: Platform.OS === 'android' && insets.bottom === 0 ? 4 : 0,
+            marginBottom: Platform.OS === "android" && insets.bottom === 0 ? 4 : 0,
           },
           headerShown: false,
         }}
@@ -46,6 +48,7 @@ export default function TabsLayout() {
             ),
           }}
         />
+
         <Tabs.Screen
           name="explore"
           options={{
@@ -55,7 +58,7 @@ export default function TabsLayout() {
             ),
           }}
         />
-        {/* REPLACED BOOKINGS WITH CART */}
+
         <Tabs.Screen
           name="cart"
           options={{
@@ -65,6 +68,7 @@ export default function TabsLayout() {
             ),
           }}
         />
+
         <Tabs.Screen
           name="profile"
           options={{
@@ -74,11 +78,12 @@ export default function TabsLayout() {
             ),
           }}
         />
+
         <Tabs.Screen
           name="bookings"
           options={{
             href: null,
-            title: 'My Bookings',
+            title: "My Bookings",
           }}
         />
       </Tabs>

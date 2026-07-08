@@ -1,13 +1,13 @@
-import { tokenCache } from '@/utils/tokenCache';
-import { ClerkLoaded, ClerkProvider } from '@clerk/clerk-expo';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Stack } from "expo-router";
+import { tokenCache } from "@/utils/tokenCache";
+import { ClerkLoaded, ClerkProvider, useAuth } from "@clerk/clerk-expo";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as Notifications from "expo-notifications";
+import { Redirect, Stack, useSegments } from "expo-router";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import * as Notifications from 'expo-notifications'; // Added for foreground configurations
-import { usePushNotifications } from '@/hooks/usePushNotifications'; // Added custom hook
+
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 import "./global.css";
 
-// 1. Configure production rules for managing notifications arriving while the app is active
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldPlaySound: false,
@@ -20,21 +20,63 @@ Notifications.setNotificationHandler({
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,                  
-      staleTime: 1000 * 60 * 5,  
+      retry: 2,
+      staleTime: 1000 * 60 * 5,
     },
   },
 });
 
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
 if (!CLERK_PUBLISHABLE_KEY) {
-  throw new Error("Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your environment.");
+  throw new Error(
+    "Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your environment."
+  );
 }
 
-// 2. Headless Context consumer component to keep your layout file perfectly clean
 function AppInitializer() {
-  usePushNotifications(); // Keeps the push registration tracking beautifully isolated
+  usePushNotifications();
   return null;
+}
+
+function AppStack() {
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="oauth-native-callback" />
+      <Stack.Screen name="settings" />
+      <Stack.Screen name="services" />
+      <Stack.Screen
+        name="modal"
+        options={{
+          presentation: "modal",
+          title: "Service Details",
+        }}
+      />
+    </Stack>
+  );
+}
+
+function AuthGate() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const segments = useSegments();
+
+  if (!isLoaded) return null;
+
+  const currentGroup = segments[0];
+  const inAuthGroup = currentGroup === "(auth)";
+  const inOAuthCallback = currentGroup === "oauth-native-callback";
+
+  if (isSignedIn && (inAuthGroup || inOAuthCallback)) {
+    return <Redirect href="/(tabs)" />;
+  }
+
+  if (!isSignedIn && !inAuthGroup && !inOAuthCallback) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  return <AppStack />;
 }
 
 export default function RootLayout() {
@@ -42,27 +84,9 @@ export default function RootLayout() {
     <ClerkProvider tokenCache={tokenCache} publishableKey={CLERK_PUBLISHABLE_KEY}>
       <ClerkLoaded>
         <QueryClientProvider client={queryClient}>
-          {/* 1. SafeAreaProvider sits at the absolute top */}
           <SafeAreaProvider>
-            
-            {/* Registers push events securely after context verification */}
             <AppInitializer />
-
-            {/* 2. Stack sets up the Navigation Context for everything inside it */}
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="settings" options={{ headerShown: false }} />
-              <Stack.Screen name="services" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="modal"
-                options={{
-                  presentation: "modal",
-                  title: "Service Details"
-                }}
-              />
-            </Stack>
-
+            <AuthGate />
           </SafeAreaProvider>
         </QueryClientProvider>
       </ClerkLoaded>

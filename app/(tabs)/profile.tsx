@@ -2,7 +2,7 @@ import { useAuth, useUser } from '@clerk/clerk-expo';
 import { FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Image, Pressable, ScrollView, StatusBar, Text, useWindowDimensions, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StatusBar, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
@@ -12,16 +12,26 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
 
-  // Responsive breakpoints
   const isTablet = width >= 768;
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      router.replace('/(auth)');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
+  // Streamlined Sign Out Handler
+  const handleSignOut = () => {
+    Alert.alert('Sign Out', 'Are you sure you want to log out of HouseXpertz?', [
+      { text: 'Cancel', style: 'cancel' },
+      { 
+        text: 'Sign Out', 
+        style: 'destructive', 
+        onPress: async () => {
+          try {
+            // Your app/_layout.tsx handles the redirection automatically 
+            // the exact millisecond this promise resolves!
+            await signOut();
+          } catch (error) {
+            console.error('Error signing out safely:', error);
+          }
+        } 
+      },
+    ]);
   };
 
   const userMetadata = {
@@ -32,7 +42,6 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1 bg-slate-50">
-      {/* Light text matching dark header background */}
       <StatusBar barStyle="light-content" backgroundColor="#0B132B" animated />
 
       <ScrollView
@@ -169,7 +178,7 @@ export default function ProfileScreen() {
               bgColor="bg-indigo-50"
               title="Privacy Policy"
               subtitle="Review account protection guidelines"
-              onPress={() => router.push('/profile/privacy-policy')} // Points to privacy-policy.tsx
+              onPress={() => router.push('/profile/privacy-policy')}
               isTablet={isTablet}
             />
             <ProfileOptionRow
@@ -178,7 +187,7 @@ export default function ProfileScreen() {
               bgColor="bg-pink-50"
               title="Terms & Conditions"
               subtitle="Read platform usage agreement rules"
-              onPress={() => router.push('/profile/terms-conditions')} // Points to terms-conditions.tsx
+              onPress={() => router.push('/profile/terms-conditions')}
               isTablet={isTablet}
               isLast
             />
@@ -189,7 +198,7 @@ export default function ProfileScreen() {
             {isSignedIn ? (
               <Pressable
                 onPress={handleSignOut}
-                className="w-full h-14 bg-red-50 border border-red-200/50 rounded-2xl flex-row items-center justify-center active:bg-red-100/70 transition-colors"
+                className="w-full h-14 bg-red-50 border border-red-200/50 rounded-2xl flex-row items-center justify-center active:bg-red-100/70 active:scale-[0.99] transition-all"
               >
                 <Ionicons name="log-out-outline" size={18} color="#EF4444" />
                 <Text className="text-red-600 font-black text-sm tracking-tight ml-2">
@@ -198,8 +207,8 @@ export default function ProfileScreen() {
               </Pressable>
             ) : (
               <Pressable
-                onPress={() => router.push('/(auth)')}
-                className="w-full h-14 bg-blue-600 rounded-2xl flex-row items-center justify-center shadow-md shadow-blue-600/10 active:bg-blue-700 transition-colors"
+                onPress={() => router.push('/(auth)/login')}
+                className="w-full h-14 bg-blue-600 rounded-2xl flex-row items-center justify-center shadow-md shadow-blue-600/10 active:bg-blue-700 active:scale-[0.99] transition-all"
               >
                 <Ionicons name="log-in-outline" size={18} color="white" />
                 <Text className="text-white font-black text-sm tracking-tight ml-2">
@@ -218,7 +227,7 @@ export default function ProfileScreen() {
   );
 }
 
-// PREMIUM OPTION ROW
+// PREMIUM OPTION ROW COMPONENT
 interface ProfileOptionRowProps {
   icon: React.ComponentProps<typeof Ionicons>['name'] | string;
   iconColor: string;
@@ -234,8 +243,7 @@ function ProfileOptionRow({ icon, iconColor, bgColor, title, subtitle, onPress, 
   return (
     <Pressable
       onPress={onPress}
-      className={`flex-row items-center py-4 px-3 active:bg-slate-50 border-b border-slate-100 ${isLast ? 'border-b-0' : ''
-        }`}
+      className={`flex-row items-center py-4 px-3 active:bg-slate-50 border-b border-slate-100 ${isLast ? 'border-b-0' : ''}`}
     >
       <View
         className={`rounded-xl items-center justify-center ${bgColor}`}

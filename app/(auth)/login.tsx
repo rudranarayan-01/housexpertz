@@ -1,101 +1,56 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useOAuth } from '@clerk/clerk-expo';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Linking from "expo-linking";
 import { MotiView } from 'moti';
-import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import React from 'react';
+import { Pressable, StatusBar, Text, View } from 'react-native';
 
 export default function LoginScreen() {
-    const router = useRouter();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [secureText, setSecureText] = useState(true);
-    const [loading, setLoading] = useState(false);
+    const { startOAuthFlow } = useOAuth({ strategy: 'oauth_google' });
 
-    const handleLogin = () => {
-        setLoading(true);
-        // Simulate instantaneous auth transition payload
-        setTimeout(() => {
-            setLoading(false);
-            router.replace('/(tabs)/explore');
-        }, 1200);
+    const handleGoogleSignIn = async () => {
+        try {
+            const redirectUrl = Linking.createURL("/oauth-native-callback");
+
+            const { createdSessionId, setActive } = await startOAuthFlow({
+                redirectUrl,
+            });
+
+            if (createdSessionId && setActive) {
+                await setActive({ session: createdSessionId });
+            }
+        } catch (err) {
+            console.error("OAuth handshake error:", err);
+        }
     };
 
     return (
-        <ScrollView className="flex-1 bg-[#0B132B]" contentContainerClassName="flex-grow justify-center" showsVerticalScrollIndicator={false}>
+        <View className="flex-1 bg-slate-50 items-center justify-center p-6">
+            <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+
             <MotiView
-                from={{ opacity: 0, translateY: 30 }}
-                animate={{ opacity: 1, translateY: 0 }}
-                className="px-6 py-10"
+                from={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: 'timing', duration: 300 }}
+                className="w-full max-w-sm items-center bg-white p-8 rounded-[32px] border border-slate-100 shadow-xl"
             >
-                {/* Branding Title */}
-                <Text className="text-white text-3xl font-black tracking-tight">Welcome Back</Text>
-                <Text className="text-slate-400 text-xs font-semibold mt-1">Sign in to continue to HouseXpertz</Text>
-
-                {/* Form Container */}
-                <View className="mt-8 gap-y-4">
-                    <View>
-                        <Text className="text-slate-300 text-xs font-bold mb-2">Email Address</Text>
-                        <View className="flex-row items-center bg-white/5 border border-white/10 h-13 rounded-2xl px-4 focus:border-blue-500">
-                            <Ionicons name="mail-outline" size={18} color="#64748B" />
-                            <TextInput
-                                value={email}
-                                onChangeText={setEmail}
-                                placeholder="enter your email"
-                                placeholderTextColor="#475569"
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                                className="flex-1 ml-3 font-semibold text-white text-sm"
-                            />
-                        </View>
-                    </View>
-
-                    <View>
-                        <View className="flex-row justify-between items-center mb-2">
-                            <Text className="text-slate-300 text-xs font-bold">Password</Text>
-                            <Pressable onPress={() => router.push('/(auth)/forgot-password')}>
-                                <Text className="text-blue-400 text-xs font-bold">Forgot?</Text>
-                            </Pressable>
-                        </View>
-                        <View className="flex-row items-center bg-white/5 border border-white/10 h-13 rounded-2xl px-4">
-                            <Ionicons name="lock-closed-outline" size={18} color="#64748B" />
-                            <TextInput
-                                value={password}
-                                onChangeText={setPassword}
-                                placeholder="••••••••"
-                                placeholderTextColor="#475569"
-                                secureTextEntry={secureText}
-                                autoCapitalize="none"
-                                className="flex-1 ml-3 font-semibold text-white text-sm"
-                            />
-                            <Pressable onPress={() => setSecureText(!secureText)}>
-                                <Ionicons name={secureText ? "eye-off-outline" : "eye-outline"} size={18} color="#64748B" />
-                            </Pressable>
-                        </View>
-                    </View>
+                <View className="w-14 h-14 bg-[#0B132B] rounded-2xl flex items-center justify-center mb-5 shadow-md">
+                    <Text className="text-white font-black text-xl">HX</Text>
                 </View>
 
-                {/* Primary Action Call */}
+                <Text className="text-slate-900 font-black text-2xl tracking-tight text-center">Welcome to HouseXpertz</Text>
+                <Text className="text-slate-400 text-xs font-semibold text-center mt-2 mb-8 leading-5">
+                    Sign in to access premium home maintenance operations, track live technician tasks, and manage service bookings.
+                </Text>
+
                 <Pressable
-                    onPress={handleLogin}
-                    disabled={loading}
-                    className="bg-blue-600 h-13 rounded-2xl mt-8 items-center justify-center active:bg-blue-700 shadow-lg shadow-blue-600/30"
+                    onPress={handleGoogleSignIn}
+                    className="w-full bg-[#0B132B] py-4 rounded-2xl active:opacity-90 flex-row items-center justify-center shadow-md shadow-slate-900/10"
                 >
-                    {loading ? (
-                        <ActivityIndicator color="#FFFFFF" />
-                    ) : (
-                        <Text className="text-white font-black text-sm tracking-wide">Sign In</Text>
-                    )}
+                    <MaterialCommunityIcons name="google" size={16} color="white" style={{ marginRight: 8 }} />
+                    <Text className="text-white font-black text-xs uppercase tracking-widest">Continue with Google</Text>
                 </Pressable>
-
-                {/* Alternative Route Link */}
-                <View className="flex-row items-center justify-center mt-6">
-                    <Text className="text-slate-400 text-xs font-semibold">Don't have an account? </Text>
-                    <Pressable onPress={() => router.push('/(auth)/signup')}>
-                        <Text className="text-blue-400 text-xs font-black">Sign Up</Text>
-                    </Pressable>
-                </View>
-
             </MotiView>
-        </ScrollView>
+        </View>
     );
 }
