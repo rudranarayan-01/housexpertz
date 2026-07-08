@@ -4,7 +4,7 @@
     "slug": "housexpertz",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/play_store_512.png",
     "scheme": "housexpertz",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -18,7 +18,7 @@
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "backgroundColor": "#0B132B",
-        "foregroundImage": "./assets/images/icon.png"
+        "foregroundImage": "./assets/images/play_store_512.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
