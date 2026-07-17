@@ -44,10 +44,27 @@ export interface CategoryServicesResponse {
   services: SubService[];
 }
 
+// @/types/service.types.ts
+
+export interface ServiceCategory {
+  _id: string;
+  name: string;
+  slug: string;
+  [key: string]: any; // Allows any future fields
+}
+
 export interface ServiceVariant {
   _id: string;
   title: string;
   price: number;
+  [key: string]: any;
+}
+
+export interface ServiceSEO {
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  [key: string]: any;
 }
 
 export interface ServiceDetailResponse {
@@ -56,17 +73,42 @@ export interface ServiceDetailResponse {
   slug: string;
   description: string;
   image: string;
-  rating: number;
-  duration?: string;
-  basePrice: number;
-  price: number;
+  price?: number;
+  basePrice?: number;
   pricingType: "fixed" | "variant" | string;
   unitName?: string;
+  rating?: number;
+  duration?: string;
+  category?: ServiceCategory;
   variants?: ServiceVariant[];
-  category: {
+  seo?: ServiceSEO;
+  createdAt?: string;
+  updatedAt?: string;
+  // Open index signature lets you access any future backend field
+  // without modifying this type configuration again.
+  [key: string]: any;
+}
+
+export interface BookOrderPayload {
+  cartItems: {
     _id: string;
     name: string;
-    slug: string;
-  };
-  numReviews: number;
+    price: number;
+    image: string;
+    variantTitle?: string | null;
+  }[];
+  totalAmount: number;
+  userEmail: string;
+  userName: string;
+  address: string;
+  phone: string;
+  couponCode?: string | null;
+  discountAmount?: number;
+}
+
+export interface BookingResponse {
+  success: boolean;
+  message: string;
+  orderId: string;
+  dbId: string;
 }
