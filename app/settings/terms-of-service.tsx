@@ -33,7 +33,7 @@ export default function TermsOfServiceScreen() {
 
           <Text className="text-[#0B132B] text-base font-black tracking-tight mb-2">1. Scope of Marketplace Services</Text>
           <Text className="text-slate-600 text-sm leading-relaxed mb-5">
-            HouseXpertz operates purely as a structural marketplace platform linking consumers with independent third-party service contractors ("Partners"). **HouseXpertz does not provide the hands-on home technical services directly and does not employ the partners.**
+            HouseXpertz operates purely as a structural marketplace platform linking consumers with independent third-party service contractors (&quot;Partners&quot;). **HouseXpertz does not provide the hands-on home technical services directly and does not employ the partners.**
           </Text>
 
           <Text className="text-[#0B132B] text-base font-black tracking-tight mb-2">2. User Account Accountability</Text>
